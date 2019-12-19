@@ -1,9 +1,10 @@
 # wt_s3_signer
-An optimized AWS S3 url signerFast S3 key urls signing
+An optimized AWS S3 key url signer.
 
 # Motivation
-The need of signing more then 10k S3 keys lead to the creation of this signer. 
-Following are the benchmarks that show why this gem exists
+The need of signing more then 10k S3 keys lead to the creation of this gem. 
+
+Following are the benchmarks that show why
 
 ```
 Warming up --------------------------------------
