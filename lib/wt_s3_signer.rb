@@ -55,7 +55,7 @@ module WT
     # @param [String] object_key The S3 key that needs a presigned url
     #
     # @raise [ArgumentError] Raises an ArgumentError if `:object_key`
-    #   is empty.
+    #  is empty.
     #
     def presigned_get_url(object_key:)
       if (object_key.nil? || object_key == "")
