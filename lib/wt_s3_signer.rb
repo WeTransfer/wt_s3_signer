@@ -20,6 +20,8 @@ require 'cgi'
 module WT
   class S3Signer
 
+    # Creates a new instance of WT::S3Signer
+    #
     # @param [String] aws_region The region of the bucket. If empty it defaults to
     #   us-east-1
     # @param [String] s3_bucket_name The bucket name
@@ -48,16 +50,21 @@ module WT
       @session_token = aws_credentials.credentials.session_token
     end
 
-    def create_bucket(bucket_name)
-      Aws::S3::Bucket.new(bucket_name)
-    end
-
+    # Creates a signed URL for the given S3 object key.
+    # The URL is temporary and the expiration time is based on the
+    # expires_in value on initialize
+    #
     # @param [String] object_key The S3 key that needs a presigned url
     #
     # @raise [ArgumentError] Raises an ArgumentError if `:object_key`
     #  is empty.
     #
+    # @return [String] The signed url
+    #
     def presigned_get_url(object_key:)
+      # Variables that do not change during consecutive calls to the
+      # method are instance variables. This way they are not assigned
+      # every single time and are cached
       if (object_key.nil? || object_key == "")
         raise ArgumentError, "object_key: must not be empty"
       end
@@ -123,6 +130,12 @@ module WT
       qs_with_signature = @canonical_querystring_template + "&X-Amz-Signature=" + signature
 
       @bucket_endpoint + canonical_uri + "?" + qs_with_signature
+    end
+
+    private
+
+    def create_bucket(bucket_name)
+      Aws::S3::Bucket.new(bucket_name)
     end
 
     def derive_signing_key(key, datestamp, region, service)
