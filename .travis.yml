@@ -7,3 +7,5 @@ rvm:
 - jruby
 sudo: false
 cache: bundler
+script:
+  - bundle exec rake
