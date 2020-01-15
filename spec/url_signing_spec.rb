@@ -23,7 +23,8 @@ describe WT::S3Signer do
     allow(WT::S3Signer).to receive(:create_bucket).and_return(bucket)
 
     bucket.object('dir/testobject').put(body: 'is here')
-
+    
+    # These values come from previous performance measurements ran on nu_backend
     expect { bucket.object('dir/testobject').presigned_url(:get, expires_in: 173) }.to perform_at_least(1000).ips
     expect { signer.presigned_get_url(object_key: 'dir/testobject') }.to perform_at_least(100000).within(0.4).warmup(0.2).ips
   end
