@@ -9,3 +9,6 @@ sudo: false
 cache: bundler
 script:
   - bundle exec rake
+env:
+  global:
+    - AWS_REGION=eu-west-1
