@@ -12,6 +12,8 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency 'aws-sdk-s3', '~> 1'
 
+  spec.add_development_dependency 'rake', '~> 13.0.1'
   spec.add_development_dependency 'rspec', '~> 3.9'
+  spec.add_development_dependency 'rspec-benchmark', '~> 0.5.1'
   spec.add_development_dependency 'rubocop'
 end
