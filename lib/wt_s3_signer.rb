@@ -20,34 +20,65 @@ require 'cgi'
 module WT
   class S3Signer
 
-    # Creates a new instance of WT::S3Signer
+    # Creates a new instance of WT::S3Signer for a given S3 bucket object.
+    # This object can be created in the AWS SDK using `Aws::S3::Bucket.new(my_bucket_name)`.
+    # The bucket object helps resolving the bucket endpoint URL, determining the bucket
+    # region and so forth.
     #
-    # @param [String] aws_region The region of the bucket. If empty it defaults to
-    #   us-east-1
-    # @param [String] s3_bucket_name The bucket name
-    # @param [Integer] expires_in The number of seconds before the presigned URL
-    #   expires 
-    # @param [Aws::Credentials] aws_credentials 
-    #
-    def initialize(aws_region:, s3_bucket_name:, expires_in:, aws_credentials: :AUTO)
+    # @param bucket[Aws::S3::Bucket] the AWS bucket resource object
+    # @param extra_attributes[Hash] any extra keyword arguments to pass to `S3Signer.new`
+    # @return [WT::S3Signer]
+    def self.for_s3_bucket(bucket, **extra_attributes)
+      kwargs = {}
+
+      kwargs[:bucket_endpoint_url] = bucket.url
+      kwargs[:bucket_host] = URI.parse(bucket.url).host
+      kwargs[:bucket_name] = bucket.name
+
+      client = Aws::S3::Client.new
+      resp = client.get_bucket_location(bucket: bucket.name)
+      aws_region = resp.data.location_constraint
+
       # us-east-1 is a special AWS region (the oldest) and one
       # of the specialties is that when you ask for the region
       # of a bucket you get an empty string back instead of the
       # actual name of the region. We need to compensate for that
       # because if our region name is empty our signature will _not_
       # be accepted by S3 (but only for buckets in the us-east-1 region!)
-      @region = aws_region == "" ? "us-east-1" : aws_region
+      kwargs[:aws_region] = aws_region == "" ? "us-east-1" : aws_region
+
+      credentials = client.config.credentials
+      credentials = credentials.credentials if credentials.respond_to?(:credentials)
+      kwargs[:access_key_id] = credentials.access_key_id
+      kwargs[:secret_access_key] = credentials.secret_access_key
+      kwargs[:session_token] = credentials.session_token
+
+      new(**kwargs, **extra_attributes)
+    end
+
+    # Creates a new instance of WT::S3Signer
+    #
+    # @param now[Time] The timestamp to use for the signature (the `expires_in` is also relative to that time)
+    # @param expires_in[Integer] The number of seconds the URL will stay current from `now`
+    # @param aws_region[String] The name of the AWS region. Also needs to be set to "us-east-1" for the respective region.
+    # @param bucket_endpoint_url[String] The endpoint URL for the bucket (usually same as the bucket hostname as resolved by the SDK)
+    # @param bucket_host[String] The bucket endpoint hostname (usually derived from the bucket endpoint URL)
+    # @param bucket_name[String] The bucket name
+    # @param access_key_id[String] The IAM access key ID
+    # @param secret_access_key[String] The IAM secret access key
+    # @param session_token[String,nil] The IAM session token if STS sessions are used
+    def initialize(now: Time.now, expires_in:, aws_region:, bucket_endpoint_url:, bucket_host:, bucket_name:, access_key_id:, secret_access_key:, session_token:)
+      @region = aws_region
       @service = "s3"
 
       @expires_in = expires_in
-      bucket = create_bucket(s3_bucket_name)
-      @bucket_endpoint = bucket.url
-      @bucket_host = URI.parse(@bucket_endpoint).host
-      @bucket_name = s3_bucket_name
-      @now = Time.now.utc
-      @secret_key = aws_credentials.credentials.secret_access_key
-      @access_key = aws_credentials.credentials.access_key_id
-      @session_token = aws_credentials.credentials.session_token
+      @bucket_endpoint = bucket_endpoint_url
+      @bucket_host = bucket_host
+      @bucket_name = bucket_name
+      @now = now.utc
+      @secret_key = secret_access_key
+      @access_key = access_key_id
+      @session_token = session_token
     end
 
     # Creates a signed URL for the given S3 object key.
