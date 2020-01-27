@@ -80,7 +80,7 @@ class ResourceAllocator
     bucket_resource = Aws::S3::Bucket.new(name)
     bucket_resource.create
     cleanup_later(name: name, resource_type: :s3_bucket) do
-      bucket_resource.delete! rescue nil
+      bucket_resource.delete!
     end
     [bucket_resource, name]
   end
