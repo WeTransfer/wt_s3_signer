@@ -22,7 +22,7 @@ require 'set'
 # * that each process uses it's own numbering sequence for allocated resource names
 # * that resources are named with date and time in the name so if they are leaked you can see when they got created
 class ResourceAllocator
-  def initialize(common_prefix: "wt-nbt")
+  def initialize(common_prefix: "wt-s3-signer-test")
     @ctr = 0
     @common_prefix = common_prefix
     @allocation_groups = [[]]
@@ -47,7 +47,7 @@ class ResourceAllocator
     alphabet = ('a'..'z').to_a + ('0'..'9').to_a
     n_chars.times.map { alphabet[SecureRandom.random_number(alphabet.length)] }.join
   end
-  
+
   def alloc_resource_name
     loop do
       @ctr += 1
@@ -108,21 +108,21 @@ class ResourceAllocator
     config.before :suite do
       this_allocator.push_alloc_group
     end
-  
+
     config.before :all do
       this_allocator.push_alloc_group
     end
-  
+
     config.after :all do
       this_allocator.pop_alloc_group
     end
-  
+
     config.around :each do |example|
       this_allocator.push_alloc_group
       example.run
       this_allocator.pop_alloc_group
     end
-    
+
     config.after :suite do
       this_allocator.cleanup_all
     end
