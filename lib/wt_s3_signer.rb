@@ -85,13 +85,12 @@ module WT
     # The URL is temporary and the expiration time is based on the
     # expires_in value on initialize
     #
-    # @param [String] object_key The S3 key that needs a presigned url
+    # @param object_key[String] The S3 key that needs a presigned url
     #
-    # @raise [ArgumentError] Raises an ArgumentError if `:object_key`
+    # @raise [ArgumentError] Raises an ArgumentError if `object_key:`
     #  is empty.
     #
     # @return [String] The signed url
-    #
     def presigned_get_url(object_key:)
       # Variables that do not change during consecutive calls to the
       # method are instance variables. This way they are not assigned
