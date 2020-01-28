@@ -8,7 +8,7 @@ script:
   - sudo apt install -y awscli jq
   - assume_role=$(aws sts assume-role --role-arn "$ASSUME_ROLE_ARN" --role-session-name "wt_s3_signer")
   - echo "$assume_role"
-  - export AWS_ACCESS_KEY_ID=$(echo "$assume_role" | jq -r .Credentials.AccessKeId)
+  - export AWS_ACCESS_KEY_ID=$(echo "$assume_role" | jq -r .Credentials.AccessKeyId)
   - echo "$AWS_ACCESS_KEY_ID"
   - export AWS_SECRET_ACCESS_KEY=$(echo "$assume_role" | jq -r .Credentials.SecretAccessKey)
   - echo "$AWS_SECRET_ACCESS_KEY"
