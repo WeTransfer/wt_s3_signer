@@ -7,7 +7,7 @@ An optimized AWS S3 key url signer.
 s3_bucket = Aws::S3::Bucket.new('shiny-bucket-name')
 ttl_seconds = 7 * 24 * 60 * 60
 
-signer = WT::S3Signer.for_s3_bucket(s3_bucket, expires_in: s3_presigned_url_ttl)
+signer = WT::S3Signer.for_s3_bucket(s3_bucket, expires_in: ttl_seconds)
 url_str = signer.presigned_get_url(object_key: full_s3_key)
       #=> https://shiny-bucket-name.s3.eu-west-1.amazonaws.com/dir/testobject?X-Amz-Algorithm...
 ```
