@@ -4,6 +4,12 @@ rvm:
 sudo: false
 cache: bundler
 script:
+  - sudo apt update
+  - sudo apt install -y awscli jq
+  - assume_role=$(aws sts assume-role --role-arn "$ASSUME_ROLE_ARN" --role-session-name "wt_s3_signer")
+  - export AWS_ACCESS_KEY_ID=$(echo "$assume_role" | jq -r .Credentials.AccessKeyId)
+  - export AWS_SECRET_ACCESS_KEY=$(echo "$assume_role" | jq -r .Credentials.SecretAccessKey)
+  - export AWS_SESSION_TOKEN=$(echo "$assume_role" | jq -r .Credentials.SessionToken)
   - bundle exec rake
 env:
   global:
