@@ -1,4 +1,4 @@
-# wt_s3_signer
+# wt_s3_signer [![Build Status](https://travis-ci.org/WeTransfer/wt_s3_signer.svg?branch=master)](https://travis-ci.org/WeTransfer/wt_s3_signer)
 
 An optimized AWS S3 URL signer.
 
