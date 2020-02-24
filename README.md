@@ -62,8 +62,3 @@ Comparison:
 WT::S3::Signer#presigned_get_url:  81421.7 i/s
 S3Signer_SDK#presigned_get_url:     1864.9 i/s - 43.66x  slower
 ```
-
-## Disclaimer
-This repo is not meant to be private. If you're reading this, is because the gem has not been completely set up.
-
-It will fall under the Hippocratic License.
