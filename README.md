@@ -62,3 +62,4 @@ Comparison:
 WT::S3::Signer#presigned_get_url:  81421.7 i/s
 S3Signer_SDK#presigned_get_url:     1864.9 i/s - 43.66x  slower
 ```
+
