@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.description = "A Ruby Gem that optimize the signing of S3 keys. The gem is especially useful when dealing with a large amount of S3 object keys"
   spec.authors     = ["Luca Suriano", "Julik Tarkhanov"]
   spec.email       = ["luca.suriano@wetransfer.com", "me@julik.nl"]
-  spec.files       = ["lib/wt_s3_signer.rb"]
+  spec.files = `git ls-files -z`.split("\x0")
   spec.homepage    = "https://github.com/WeTransfer/wt_s3_signer"
   spec.license     = "MIT (Hippocratic)"
 
