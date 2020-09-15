@@ -9,14 +9,29 @@ end
 describe WT::S3Signer do
   include_context 'signer_bucket'
 
+  def wall_clock_time_spent
+    start = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    yield
+    Process.clock_gettime(Process::CLOCK_MONOTONIC) - start
+  end
+
   it 'WT::Signer is faster than Aws::S3::Presigner' do
     allow(WT::S3Signer).to receive(:create_bucket).and_return(bucket)
 
     bucket.object('dir/testobject').put(body: 'is here')
-    
+
     # These values come from previous performance measurements ran on nu_backend
-    expect { bucket.object('dir/testobject').presigned_url(:get, expires_in: 173) }.to perform_at_least(1000).ips
-    expect { signer.presigned_get_url(object_key: 'dir/testobject') }.to perform_at_least(100000).within(0.4).warmup(0.2).ips
+    time_with_sdk = wall_clock_time_spent do
+      1000.times do
+        bucket.object('dir/testobject').presigned_url(:get, expires_in: 173)
+      end
+    end
+    time_with_custom_signer = wall_clock_time_spent do
+      1000.times do
+        signer.presigned_get_url(object_key: 'dir/testobject')
+      end
+    end
+    expect(time_with_custom_signer).to be < time_with_sdk
   end
 
   it 'signs an s3 key' do
