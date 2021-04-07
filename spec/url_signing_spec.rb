@@ -44,4 +44,22 @@ describe WT::S3Signer do
     expect{signer.presigned_get_url(object_key: '')}.to raise_error(ArgumentError)
   end
 
+  describe '.for_s3_bucket' do
+    it 'accepts an s3_client instance via dependency injection' do
+      allow(WT::S3Signer).to receive(:create_bucket).and_return(bucket)
+      bucket.object('dir/testobject').put(body: 'is here')
+
+      s3_client = Aws::S3::Client.new
+
+      expect(Aws::S3::Client).not_to receive(:new)
+
+      signer = described_class.for_s3_bucket(
+        bucket, client: s3_client, expires_in: 174
+      )
+
+      presigned_url = signer.presigned_get_url(object_key: 'dir/testobject')
+
+      expect(presigned_url).to include("X-Amz-Expires=174")
+    end
+  end
 end
