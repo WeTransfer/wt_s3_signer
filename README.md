@@ -8,7 +8,9 @@ An optimized AWS S3 URL signer.
 s3_bucket = Aws::S3::Bucket.new('shiny-bucket-name')
 ttl_seconds = 7 * 24 * 60 * 60
 
-signer = WT::S3Signer.for_s3_bucket(s3_bucket, expires_in: ttl_seconds)
+# we suggest caching the S3 client in the application to reuse the cached credentials
+s3_client = Aws::S3::Client.new
+signer = WT::S3Signer.for_s3_bucket(s3_bucket, client: s3_client, expires_in: ttl_seconds)
 url_str = signer.presigned_get_url(object_key: full_s3_key)
       #=> https://shiny-bucket-name.s3.eu-west-1.amazonaws.com/dir/testobject?X-Amz-Algorithm...
 ```
