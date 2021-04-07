@@ -26,18 +26,16 @@ module WT
     # region and so forth.
     #
     # @param bucket[Aws::S3::Bucket] the AWS bucket resource object
-    # @param client[Aws::S3::Client] an instance AWS S3 Client. It's recommended
-    # to cache it in the application to avoid having too many HTTP requests to
-    # the AWS instance metadata endpoint
     # @param extra_attributes[Hash] any extra keyword arguments to pass to `S3Signer.new`
     # @return [WT::S3Signer]
-    def self.for_s3_bucket(bucket, client: Aws::S3::Client.new, **extra_attributes)
+    def self.for_s3_bucket(bucket, **extra_attributes)
       kwargs = {}
 
       kwargs[:bucket_endpoint_url] = bucket.url
       kwargs[:bucket_host] = URI.parse(bucket.url).host
       kwargs[:bucket_name] = bucket.name
 
+      client = Aws::S3::Client.new
       resp = client.get_bucket_location(bucket: bucket.name)
       aws_region = resp.data.location_constraint
 
