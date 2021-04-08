@@ -1,5 +1,5 @@
 module WT
   class S3Signer
-    VERSION = '0.2.0'
+    VERSION = '0.3.0'
   end
 end
