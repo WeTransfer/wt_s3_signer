@@ -31,7 +31,7 @@ module WT
     # the AWS instance metadata endpoint
     # @param extra_attributes[Hash] any extra keyword arguments to pass to `S3Signer.new`
     # @return [WT::S3Signer]
-    def self.for_s3_bucket(bucket, client: Aws::S3::Client.new, **extra_attributes)
+    def self.for_s3_bucket(bucket, **extra_attributes)
       kwargs = {}
 
       kwargs[:bucket_endpoint_url] = bucket.url
@@ -169,6 +169,13 @@ module WT
     def create_bucket(bucket_name)
       Aws::S3::Bucket.new(bucket_name)
     end
+
+    # AWS gems have a mechanism to cache credentials internally. So take
+    # advantage of this, it's necessary to use the same client instance.
+    def self.client
+      @client ||= Aws::S3::Client.new
+    end
+    private_class_method :client
 
     def derive_signing_key(key, datestamp, region, service)
       prefixed_key = "AWS4" + key
