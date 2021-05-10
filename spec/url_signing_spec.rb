@@ -45,21 +45,22 @@ describe WT::S3Signer do
   end
 
   describe '.for_s3_bucket' do
-    it 'accepts an s3_client instance via dependency injection' do
+    it 'uses a singleton instance of s3 client' do
       allow(WT::S3Signer).to receive(:create_bucket).and_return(bucket)
       bucket.object('dir/testobject').put(body: 'is here')
 
-      s3_client = Aws::S3::Client.new
+      # If other tests run before, they might instantiate the singleton client,
+      # so it's acceptable for Aws::S3::Client to not receive :new
+      expect(Aws::S3::Client).to receive(:new).at_most(:once).and_call_original
 
-      expect(Aws::S3::Client).not_to receive(:new)
+      signer1 = described_class.for_s3_bucket(bucket, expires_in: 174)
+      signer2 = described_class.for_s3_bucket(bucket, expires_in: 175)
 
-      signer = described_class.for_s3_bucket(
-        bucket, client: s3_client, expires_in: 174
-      )
+      presigned_url1 = signer1.presigned_get_url(object_key: 'dir/testobject')
+      presigned_url2 = signer2.presigned_get_url(object_key: 'dir/testobject')
 
-      presigned_url = signer.presigned_get_url(object_key: 'dir/testobject')
-
-      expect(presigned_url).to include("X-Amz-Expires=174")
+      expect(presigned_url1).to include("X-Amz-Expires=174")
+      expect(presigned_url2).to include("X-Amz-Expires=175")
     end
   end
 end
