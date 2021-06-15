@@ -173,7 +173,11 @@ module WT
     # AWS gems have a mechanism to cache credentials internally. So take
     # advantage of this, it's necessary to use the same client instance.
     def self.client
-      @client ||= Aws::S3::Client.new
+      @client ||= Aws::S3::Client.new(
+        # The default value is 0. If the metadata service fails to respond, it
+        # will raise missing credentials when used
+        instance_profile_credentials_retries: 5,
+      )
     end
     private_class_method :client
 
