@@ -78,11 +78,16 @@ describe WT::S3Signer do
         Aws::S3::Errors::AccessDenied.new(_context = nil, _message = nil)
       )
 
+      # After the exercise, we are going to compare if the singleton client has
+      # changed, so it's good to check if it is not null
+      expect(described_class.client).not_to be_nil
+
       # exercise again
       expect do
         described_class.for_s3_bucket(bucket, expires_in: 174)
       end.to raise_error(Aws::S3::Errors::AccessDenied)
 
+      expect(described_class.client).not_to be_nil
       expect(described_class.client).not_to be(s3_client)
     end
 
@@ -101,11 +106,16 @@ describe WT::S3Signer do
         Aws::Errors::MissingCredentialsError.new(_context = nil, _message = nil)
       )
 
+      # After the exercise, we are going to compare if the singleton client has
+      # changed, so it's good to check if it is not null
+      expect(described_class.client).not_to be_nil
+
       # exercise again
       expect do
         described_class.for_s3_bucket(bucket, expires_in: 174)
       end.to raise_error(Aws::Errors::MissingCredentialsError)
 
+      expect(described_class.client).not_to be_nil
       expect(described_class.client).not_to be(s3_client)
     end
   end
