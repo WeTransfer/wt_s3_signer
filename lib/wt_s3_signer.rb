@@ -56,7 +56,7 @@ module WT
       kwargs[:session_token] = credentials.session_token
 
       new(**kwargs, **extra_attributes)
-    rescue Aws::S3::Errors::AccessDenied
+    rescue Aws::S3::Errors::AccessDenied, Aws::Errors::MissingCredentialsError
       # We noticed cases where errors related to AWS credentials started to happen suddenly.
       # We don't know the root cause yet, but what we can do is release the
       # @client instance because it contains a cache of credentials that in most cases
