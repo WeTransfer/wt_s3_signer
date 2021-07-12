@@ -80,7 +80,7 @@ describe WT::S3Signer do
 
       # After the exercise, we are going to compare if the singleton client has
       # changed, so it's good to check if it is not null
-      expect(described_class.client).not_to be_nil
+      expect(described_class.client).to eq(s3_client)
 
       # exercise again
       expect do
@@ -88,7 +88,7 @@ describe WT::S3Signer do
       end.to raise_error(Aws::S3::Errors::AccessDenied)
 
       expect(described_class.client).not_to be_nil
-      expect(described_class.client).not_to be(s3_client)
+      expect(described_class.client).not_to eq(s3_client)
     end
 
     it 'releases the singleton client when AWS raises a missing credentials error' do
@@ -108,7 +108,7 @@ describe WT::S3Signer do
 
       # After the exercise, we are going to compare if the singleton client has
       # changed, so it's good to check if it is not null
-      expect(described_class.client).not_to be_nil
+      expect(described_class.client).to eq(s3_client)
 
       # exercise again
       expect do
@@ -116,7 +116,7 @@ describe WT::S3Signer do
       end.to raise_error(Aws::Errors::MissingCredentialsError)
 
       expect(described_class.client).not_to be_nil
-      expect(described_class.client).not_to be(s3_client)
+      expect(described_class.client).not_to eq(s3_client)
     end
   end
 end
