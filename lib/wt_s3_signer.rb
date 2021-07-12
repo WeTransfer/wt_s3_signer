@@ -56,6 +56,14 @@ module WT
       kwargs[:session_token] = credentials.session_token
 
       new(**kwargs, **extra_attributes)
+    rescue Aws::S3::Errors::AccessDenied, Aws::Errors::MissingCredentialsError
+      # We noticed cases where errors related to AWS credentials started to happen suddenly.
+      # We don't know the root cause yet, but what we can do is release the
+      # @client instance because it contains a cache of credentials that in most cases
+      # is no longer valid.
+      @client = nil
+
+      raise
     end
 
     # Creates a new instance of WT::S3Signer
@@ -164,12 +172,6 @@ module WT
       @bucket_endpoint + canonical_uri + "?" + qs_with_signature
     end
 
-    private
-
-    def create_bucket(bucket_name)
-      Aws::S3::Bucket.new(bucket_name)
-    end
-
     # AWS gems have a mechanism to cache credentials internally. So take
     # advantage of this, it's necessary to use the same client instance.
     def self.client
@@ -179,7 +181,12 @@ module WT
         instance_profile_credentials_retries: 5,
       )
     end
-    private_class_method :client
+
+    def self.client=(client)
+      @client = client
+    end
+
+    private
 
     def derive_signing_key(key, datestamp, region, service)
       prefixed_key = "AWS4" + key
