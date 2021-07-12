@@ -62,5 +62,28 @@ describe WT::S3Signer do
       expect(presigned_url1).to include("X-Amz-Expires=174")
       expect(presigned_url2).to include("X-Amz-Expires=175")
     end
+
+    it 'releases the singleton client when AWS raises an access denied error' do
+      s3_client = Aws::S3::Client.new(stub_responses: true)
+      described_class.client = s3_client
+
+      s3_client.stub_responses(:get_object, body: 'is here')
+
+      # just to set @client internally
+      described_class.for_s3_bucket(bucket, expires_in: 174)
+
+      # now, let's simulate an error on AWS
+      s3_client.stub_responses(
+        :get_bucket_location,
+        Aws::S3::Errors::AccessDenied.new(_context = nil, _message = nil)
+      )
+
+      # exercise again
+      expect do
+        described_class.for_s3_bucket(bucket, expires_in: 174)
+      end.to raise_error(Aws::S3::Errors::AccessDenied)
+
+      expect(described_class.client).not_to be(s3_client)
+    end
   end
 end

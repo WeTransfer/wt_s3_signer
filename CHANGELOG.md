@@ -1,3 +1,6 @@
+## 1.0.2
+* Release the singleton S3 client when AWS raises access denied to be able to use a new credential next time
+
 ## 1.0.1
 * Set `instance_profile_credentials_retries` to 5 in the S3::Client instance to prevent "missing credentials" errors
 
